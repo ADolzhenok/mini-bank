@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(String[] args){
         try (AnnotationConfigApplicationContext context =
-                     new AnnotationConfigApplicationContext(ApplicationConfiguration.class)){
+                     new AnnotationConfigApplicationContext("com.vda")){
             ConsoleInput consoleInput = context.getBean(ConsoleInput.class);
             consoleInput.run();
         }

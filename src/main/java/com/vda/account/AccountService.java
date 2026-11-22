@@ -1,6 +1,8 @@
 package com.vda.account;
 
 import com.vda.user.User;
+import com.vda.utils.TransactionHelper;
+import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -11,23 +13,18 @@ import java.util.stream.Collectors;
 
 @Component
 public class AccountService {
-    private static final Map<Integer, Account> accountMap = new HashMap<>();
     private final AccountProperties accountProperties;
 
     public AccountService(AccountProperties accountProperties){
         this.accountProperties = accountProperties;
     }
 
-    public Account createAccount(User user){
-
-        int accountId = accountMap.size() + 1;
+    public Account createAccount(Session session, User user){
         Account newAccount = new Account(
-                accountId,
-                user.getId(),
-                accountProperties.getDefaultAmount()
+                accountProperties.getDefaultAmount(),
+                user
         );
-        accountMap.put(accountId, newAccount);
-        user.getAccountList().add(newAccount);
+        session.persist(newAccount);
 
         return newAccount;
     }
@@ -49,7 +46,7 @@ public class AccountService {
 
     public int accountTransfer(Account sourceAccount, Account targetAccount, int amount){
         int commissionAmount = 0;
-        if (sourceAccount.getUserId() == targetAccount.getUserId()){
+        if (sourceAccount.getUser().getId() == targetAccount.getUser().getId()){
             accountWithdraw(sourceAccount, amount);
             accountDeposit(targetAccount, amount);
         }
@@ -62,11 +59,11 @@ public class AccountService {
         return commissionAmount;
     }
 
-    public List<Integer> accountClose(User user, Account accountToClose){
+    public List<Integer> accountClose(Session session, User user, Account accountToClose){
 
         List<Account> userAccounts = user.getAccountList().stream()
                 .filter(account ->
-                        account.getUserId() == accountToClose.getUserId() &&
+                        account.getUser().getId() == accountToClose.getUser().getId() &&
                         account.getId() != accountToClose.getId())
                 .collect(Collectors.toList());
 
@@ -83,19 +80,21 @@ public class AccountService {
 
         accountTransfer(accountToClose, targetAccount, accountToClose.getMoneyAmount());
 
-        user.setAccountList(userAccounts);
-        accountMap.remove(accountToClose.getId());
+        session.remove(accountToClose);
+        session.refresh(user);
 
         return closedAccAmountAndTargetAccId;
     }
 
-    public Account findAccountById(int accountId){
-        if (!accountMap.containsKey(accountId)){
+    public Account findAccountById(Session session, int accountId){
+        Account account = session.find(Account.class, accountId);
+
+        if (account == null){
             throw new IllegalStateException(
                     "The account doesn't exist with this id=" + accountId
             );
         }
-        return accountMap.get(accountId);
+        return account;
     }
 
     private void validAmount(int amount){
