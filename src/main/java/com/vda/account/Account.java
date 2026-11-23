@@ -1,23 +1,38 @@
 package com.vda.account;
 
+import com.vda.user.User;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name="accounts")
 public class Account {
 
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     int id;
-    int userId;
+    @Column(name="money_amount", nullable = false)
     int moneyAmount;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="user_id")
+    private User user;
 
-    public Account(int id, int userId, int moneyAmount){
-        this.id = id;
-        this.userId = userId;
+    public Account(){}
+
+    public Account(int moneyAmount, User user){
         this.moneyAmount = moneyAmount;
+        this.user = user;
     }
 
     public int getId(){
         return this.id;
     }
 
-    public int getUserId(){
-        return this.userId;
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public void setMoneyAmount(int moneyAmount) {
@@ -32,8 +47,7 @@ public class Account {
     public String toString() {
         return "Account{" +
                 "id=" + id +
-                ", userId=" + userId +
-                ", moneyAmount=" + moneyAmount +
-                '}';
+                ", userId=" + user.getId() +
+                ", moneyAmount=" + moneyAmount + '}';
     }
 }

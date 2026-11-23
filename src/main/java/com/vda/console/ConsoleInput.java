@@ -43,10 +43,14 @@ public class ConsoleInput {
                     command.execute(sc);
                 }
                 catch(IllegalArgumentException ex){
-                    System.out.println("The command is invalid. Try again");
+                    System.out.println(ex.getMessage());
+                    System.out.println("Error: The command is invalid or something wrong happened");
                 }
                 catch(IllegalStateException ex){
                     System.out.println(ex.getMessage());
+                }
+                catch(Exception ex){
+                    System.out.println("Unexpected error. Try again");
                 }
             }
             System.out.println("MiniBank stopped.");

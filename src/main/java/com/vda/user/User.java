@@ -1,18 +1,26 @@
 package com.vda.user;
 
 import com.vda.account.Account;
+import jakarta.persistence.*;
 
 import java.util.List;
 
+@Entity
+@Table(name="users")
 public class User {
+
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private int id;
+    @Column(name="login", nullable = false, unique = true)
     private String login;
+    @OneToMany(mappedBy="user")
     private List<Account> accountList;
 
-    public User(int id, String login, List<Account> accountList){
-        this.id = id;
+    public User(){}
+
+    public User(String login){
         this.login = login;
-        this.accountList = accountList;
     }
 
     public int getId(){
