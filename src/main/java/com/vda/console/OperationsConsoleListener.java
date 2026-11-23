@@ -31,6 +31,7 @@ public class OperationsConsoleListener {
         return transactionHelper.executeTransaction( session -> {
             User user = userService.createUser(session, login);
             accountService.createAccount(session, user);
+            //for sout after creating
             session.refresh(user);
             return user;
         });
@@ -75,9 +76,7 @@ public class OperationsConsoleListener {
     public List<Integer> accountClose(int accountId){
         return transactionHelper.executeTransaction(session -> {
             Account accountToClose = accountService.findAccountById(session, accountId);
-            User user = userService.findUserById(session, accountToClose.getUser().getId());
-
-            return accountService.accountClose(session, user, accountToClose);
+            return accountService.accountClose(session, accountToClose);
         });
 
     }

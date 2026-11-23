@@ -1,13 +1,9 @@
 package com.vda.user;
 
-import com.vda.account.AccountService;
-import com.vda.utils.TransactionHelper;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class UserService {
@@ -38,11 +34,13 @@ public class UserService {
     }
 
     public List<User> findAllUsers(Session session){
-        return session.createQuery("FROM User", User.class).getResultList();
+        List<User> users = session
+                .createQuery("FROM User u JOIN FETCH u.accountList", User.class).getResultList();
+        return users;
     }
 
     private boolean validLogin(String login){
-        return login.matches("^[a-zA-Zа-яА-Я\\s]+$");
+        return login.trim().matches("^[a-zA-Zа-яА-Я\\s]+$");
     }
 
     public User findUserById(Session session, int userId){

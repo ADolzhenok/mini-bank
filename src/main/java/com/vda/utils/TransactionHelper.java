@@ -42,7 +42,8 @@ public class TransactionHelper {
             return result;
         }
         catch(Exception e){
-            System.out.println("Exception was accured");
+            System.out.println("Exception was occurred");
+            System.out.println(e.getMessage());
             tx.rollback();
             throw e;
         }

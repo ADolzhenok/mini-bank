@@ -47,7 +47,7 @@ public class Account {
     public String toString() {
         return "Account{" +
                 "id=" + id +
-                ", moneyAmount=" + moneyAmount +
-                ", user=" + user +  '}';
+                ", userId=" + user.getId() +
+                ", moneyAmount=" + moneyAmount + '}';
     }
 }

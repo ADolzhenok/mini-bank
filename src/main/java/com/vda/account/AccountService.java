@@ -5,10 +5,7 @@ import com.vda.utils.TransactionHelper;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -45,6 +42,10 @@ public class AccountService {
     }
 
     public int accountTransfer(Account sourceAccount, Account targetAccount, int amount){
+        if (sourceAccount.getId() == targetAccount.getId()){
+            throw new IllegalStateException("transferring between the same account is not allow");
+        }
+
         int commissionAmount = 0;
         if (sourceAccount.getUser().getId() == targetAccount.getUser().getId()){
             accountWithdraw(sourceAccount, amount);
@@ -59,13 +60,14 @@ public class AccountService {
         return commissionAmount;
     }
 
-    public List<Integer> accountClose(Session session, User user, Account accountToClose){
+    public List<Integer> accountClose(Session session, Account accountToClose){
 
-        List<Account> userAccounts = user.getAccountList().stream()
+        List<Account> userAccounts = accountToClose.getUser().getAccountList().stream()
                 .filter(account ->
                         account.getUser().getId() == accountToClose.getUser().getId() &&
                         account.getId() != accountToClose.getId())
-                .collect(Collectors.toList());
+                .sorted(Comparator.comparingInt(Account::getId))
+                .toList();
 
         if (userAccounts.isEmpty()){
             throw new IllegalStateException(
@@ -81,7 +83,6 @@ public class AccountService {
         accountTransfer(accountToClose, targetAccount, accountToClose.getMoneyAmount());
 
         session.remove(accountToClose);
-        session.refresh(user);
 
         return closedAccAmountAndTargetAccId;
     }
